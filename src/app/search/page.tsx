@@ -1,22 +1,20 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Search, ArrowLeft, ExternalLink, MoreHorizontal } from "lucide-react"
+import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { SearchResult, SearchResponse } from "../types"
-import { searchService, sampleData } from "@/lib/search-service"
+import { SearchResult } from "../types"
+import { SearchInput } from "@/components/search-input"
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showAppsGrid, setShowAppsGrid] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(false)
   const [searchStats, setSearchStats] = useState<{
     totalHits: number
     processingTime: number
@@ -37,59 +35,106 @@ export default function SearchPage() {
   const initialQuery = searchParams.get('q') || ""
 
   useEffect(() => {
-    setSearchQuery(initialQuery)
     if (initialQuery) {
       performSearch(initialQuery)
+    } else {
+      checkAndInitializeIndex()
     }
   }, [initialQuery])
 
+  const checkAndInitializeIndex = async () => {
+    try {
+      const response = await fetch('/api/meilisearch/index?name=internal_sites')
+      
+      if (!response.ok && response.status === 500) {
+        console.log("Index not found, attempting to initialize...")
+        const initResponse = await fetch('/api/meilisearch/init', {
+          method: 'POST'
+        })
+        
+        if (initResponse.ok) {
+          console.log("Meilisearch index initialized successfully!")
+        }
+      }
+    } catch (error) {
+      console.log("Could not connect to Meilisearch. Make sure it's running on localhost:7700")
+    }
+  }
+
   const performSearch = async (query: string) => {
-    if (!query.trim()) return
+    if (!query.trim()) {
+      setSearchResults([])
+      setSearchStats({ totalHits: 0, processingTime: 0 })
+      return
+    }
 
     setIsLoading(true)
     const startTime = Date.now()
 
     try {
-      // For now, we'll use mock data that filters based on the query
-      // Later, you'll replace this with actual Meilisearch calls
-      const filteredResults = sampleData.filter((result: SearchResult) =>
-        result.name.toLowerCase().includes(query.toLowerCase()) ||
-        result.description?.toLowerCase().includes(query.toLowerCase())
-      )
-
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 200))
+      const response = await fetch(`/api/meilisearch/search?q=${encodeURIComponent(query)}&limit=20`)
       
+      if (!response.ok) {
+        throw new Error(`Search failed: ${response.statusText}`)
+      }
+
+      const searchData = await response.json()
       const processingTime = Date.now() - startTime
       
-      setSearchResults(filteredResults)
+      setSearchResults(searchData.hits || [])
       setSearchStats({
-        totalHits: filteredResults.length,
-        processingTime
+        totalHits: searchData.estimatedTotalHits || searchData.hits?.length || 0,
+        processingTime: searchData.processingTimeMs || processingTime
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error("Search error:", error)
       setSearchResults([])
+      setSearchStats({ totalHits: 0, processingTime: 0 })
+      
+      if (error.message.includes('500') || error.message.includes('index')) {
+        console.log("Search failed, attempting to initialize Meilisearch...")
+        try {
+          const initResponse = await fetch('/api/meilisearch/init', { method: 'POST' })
+          if (initResponse.ok) {
+            console.log("Meilisearch initialized! You can now search again.")
+            setTimeout(() => {
+              performSearch(query)
+            }, 1000)
+          }
+        } catch (initError) {
+          console.error("Failed to initialize Meilisearch:", initError)
+        }
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-      performSearch(searchQuery)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch()
-    }
-  }
-
   const toggleAppsGrid = () => {
     setShowAppsGrid(!showAppsGrid)
+  }
+
+  const handleManualInit = async () => {
+    setIsInitializing(true)
+    try {
+      const response = await fetch('/api/meilisearch/init', { method: 'POST' })
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Meilisearch initialized successfully:", data)
+        setTimeout(() => {
+          performSearch("portal")
+        }, 500)
+      } else {
+        const errorData = await response.json()
+        console.error("Initialization failed:", errorData)
+        alert(`Failed to initialize: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error("Initialization error:", error)
+      alert("Failed to initialize. Make sure Meilisearch is running on localhost:7700")
+    } finally {
+      setIsInitializing(false)
+    }
   }
 
   const getTypeColor = (type: string) => {
@@ -114,24 +159,11 @@ export default function SearchPage() {
               </Link>
               
               <div className="flex-1 max-w-2xl">
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                    <Search className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <Input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="w-full h-11 pl-12 pr-12 text-base border border-gray-300 rounded-full focus:border-blue-500 focus:shadow-sm hover:shadow-sm"
-                    placeholder="Search your network..."
-                  />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
-                    <button className="p-2 hover:bg-gray-100 rounded">
-                      <Search className="w-4 h-4 text-blue-500" />
-                    </button>
-                  </div>
-                </div>
+                <SearchInput 
+                  variant="header"
+                  initialQuery={initialQuery}
+                  placeholder="Search your network..."
+                />
               </div>
             </div>
 
@@ -243,7 +275,7 @@ export default function SearchPage() {
       {/* Results */}
       <main className="max-w-2xl mx-auto px-6 py-4">
         {/* Search Stats */}
-        {searchQuery && (
+        {initialQuery && (
           <div className="text-gray-600 text-sm mb-6">
             {isLoading ? (
               <div className="flex items-center space-x-2">
@@ -311,25 +343,45 @@ export default function SearchPage() {
                 </div>
               </div>
             ))
-          ) : searchQuery && !isLoading ? (
+          ) : initialQuery && !isLoading ? (
             <div className="text-center py-20">
-              <div className="text-gray-500 text-xl mb-4">No results found for &quot;{searchQuery}&quot;</div>
+              <div className="text-gray-500 text-xl mb-4">No results found for &quot;{initialQuery}&quot;</div>
               <div className="text-gray-400 text-sm space-y-2">
                 <div>Make sure all words are spelled correctly.</div>
                 <div>Try different keywords.</div>
                 <div>Try more general keywords.</div>
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <div className="text-blue-700 text-sm">
+                    💡 <strong>Tip:</strong> Search for terms like &quot;portal&quot;, &quot;finance&quot;, &quot;documents&quot;, or &quot;help&quot;
+                  </div>
+                </div>
               </div>
             </div>
           ) : null}
         </div>
 
         {/* Empty State for no query */}
-        {!searchQuery && (
+        {!initialQuery && (
           <div className="text-center py-20">
             <Search className="w-16 h-16 text-gray-300 mx-auto mb-6" />
             <div className="text-gray-500 text-xl mb-2">Start your search</div>
-            <div className="text-gray-400 text-sm">
+            <div className="text-gray-400 text-sm mb-6">
               Enter a search term to find resources across your network
+            </div>
+            <div className="p-6 bg-gray-50 rounded-lg max-w-md mx-auto">
+              <div className="text-gray-700 text-sm mb-4">
+                🚀 <strong>First time here?</strong> Initialize the search database with sample data
+              </div>
+              <Button 
+                onClick={handleManualInit}
+                disabled={isInitializing}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isInitializing ? "Initializing..." : "Initialize Search Data"}
+              </Button>
+              <div className="text-gray-500 text-xs mt-2">
+                This will set up sample internal company resources
+              </div>
             </div>
           </div>
         )}

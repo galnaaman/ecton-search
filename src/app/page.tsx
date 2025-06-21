@@ -1,34 +1,26 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Camera, Mic, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { DockBar } from "@/components/ui/dock-bar"
+import { SearchInput, SearchInputRef } from "@/components/search-input"
 
 export default function HomePage() {
-  const [searchQuery, setSearchQuery] = useState("")
   const [showAppsGrid, setShowAppsGrid] = useState(false)
   const router = useRouter()
+  const searchInputRef = useRef<SearchInputRef>(null)
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-    }
+  const handleNetworkSearch = () => {
+    searchInputRef.current?.performSearch()
   }
 
   const handleLuckySearch = () => {
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}&lucky=true`)
+    const query = searchInputRef.current?.getSearchQuery()
+    if (query?.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query)}&lucky=true`)
     } else {
       router.push('/search?lucky=true')
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch()
     }
   }
 
@@ -148,35 +140,20 @@ export default function HomePage() {
           </h1>
         </div>
 
-        {/* Search Box */}
+        {/* Search Box with Autocomplete */}
         <div className="w-full max-w-[584px] mb-8">
-          <div className="relative">
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-              <Search className="w-5 h-5 text-gray-400" />
-            </div>
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="w-full h-12 pl-12 pr-12 text-base bg-white text-black border-none rounded-full shadow-sm focus:shadow-md focus:outline-none"
-              placeholder="Search your network..."
-            />
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex space-x-3">
-              <button className="hover:bg-gray-100 p-1 rounded">
-                <Mic className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-              </button>
-              <button className="hover:bg-gray-100 p-1 rounded">
-                <Camera className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-              </button>
-            </div>
-          </div>
+          <SearchInput 
+            ref={searchInputRef}
+            variant="homepage"
+            showIcons={true}
+            placeholder="Search your network..."
+          />
         </div>
 
         {/* Search Buttons */}
         <div className="flex space-x-4 mb-8">
           <Button
-            onClick={handleSearch}
+            onClick={handleNetworkSearch}
             variant="secondary"
             className="px-6 py-2 bg-[#303134] text-white border border-[#303134] hover:shadow-sm hover:border-gray-600 rounded"
           >
