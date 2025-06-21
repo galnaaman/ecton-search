@@ -1,0 +1,72 @@
+[
+  {
+    "id": "portal-001",
+    "name": "Employee Portal - Main Dashboard",
+    "url": "https://portal.internal.company.com/dashboard",
+    "description": "Central hub for employee resources, HR forms, payroll information, and company announcements",
+    "type": "website"
+  },
+  {
+    "id": "finance-001",
+    "name": "Financial System - Budget Reports",
+    "url": "https://finance.internal.company.com/reports",
+    "description": "Access quarterly budget reports, expense tracking, and financial analytics dashboard",
+    "type": "system"
+  },
+  {
+    "id": "docs-001",
+    "name": "Document Management System",
+    "url": "https://docs.internal.company.com",
+    "description": "Centralized document storage, version control, and collaboration platform for all company files",
+    "type": "document"
+  },
+  {
+    "id": "crm-001",
+    "name": "Customer Relationship Management",
+    "url": "https://crm.internal.company.com",
+    "description": "Customer database, sales pipeline, and client communication tracking system",
+    "type": "database"
+  },
+  {
+    "id": "helpdesk-001",
+    "name": "IT Support & Help Desk",
+    "url": "https://helpdesk.internal.company.com",
+    "description": "Submit IT tickets, access knowledge base, and track support request status",
+    "type": "website"
+  },
+  {
+    "id": "inventory-001",
+    "name": "Inventory Management System",
+    "url": "https://inventory.internal.company.com",
+    "description": "Track office supplies, equipment, and asset management across all locations",
+    "type": "system"
+  },
+  {
+    "id": "wiki-001",
+    "name": "Company Wiki & Knowledge Base",
+    "url": "https://wiki.internal.company.com",
+    "description": "Internal documentation, procedures, policies, and institutional knowledge repository",
+    "type": "document"
+  },
+  {
+    "id": "monitoring-001",
+    "name": "System Monitoring Dashboard",
+    "url": "https://monitoring.internal.company.com",
+    "description": "Real-time server monitoring, network status, and infrastructure health metrics",
+    "type": "system"
+  },
+  {
+    "id": "mail-001",
+    "name": "Internal Mail Server",
+    "url": "https://mail.internal.company.com",
+    "description": "Corporate email system and communication platform",
+    "type": "website"
+  },
+  {
+    "id": "calendar-001",
+    "name": "Company Calendar System",
+    "url": "https://calendar.internal.company.com",
+    "description": "Shared calendars, meeting rooms booking, and event scheduling",
+    "type": "website"
+  }
+] 
