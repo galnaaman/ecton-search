@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Camera, Mic } from "lucide-react"
+import { Search, Camera, Mic, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [showAppsGrid, setShowAppsGrid] = useState(false)
   const router = useRouter()
 
   const handleSearch = () => {
@@ -30,19 +31,103 @@ export default function HomePage() {
     }
   }
 
+  const toggleAppsGrid = () => {
+    setShowAppsGrid(!showAppsGrid)
+  }
+
+  const organizationApps = [
+    { name: "Portal", icon: "🏢", url: "https://portal.internal.company.com", color: "bg-blue-500" },
+    { name: "Finance", icon: "💰", url: "https://finance.internal.company.com", color: "bg-green-500" },
+    { name: "CRM", icon: "👥", url: "https://crm.internal.company.com", color: "bg-purple-500" },
+    { name: "Documents", icon: "📄", url: "https://docs.internal.company.com", color: "bg-orange-500" },
+    { name: "Help Desk", icon: "🎧", url: "https://helpdesk.internal.company.com", color: "bg-red-500" },
+    { name: "Calendar", icon: "📅", url: "https://calendar.internal.company.com", color: "bg-blue-600" },
+    { name: "Mail", icon: "✉️", url: "https://mail.internal.company.com", color: "bg-gray-600" },
+    { name: "Wiki", icon: "📖", url: "https://wiki.internal.company.com", color: "bg-yellow-500" },
+    { name: "Monitoring", icon: "📊", url: "https://monitoring.internal.company.com", color: "bg-indigo-500" }
+  ]
+
   return (
     <div className="min-h-screen bg-[#202124] text-white flex flex-col">
       {/* Header */}
-      <header className="flex justify-end items-center p-4 space-x-4">
+      <header className="flex justify-end items-center p-4 space-x-4 relative">
         <a href="#" className="text-sm text-gray-300 hover:underline">
           Gmail
         </a>
         <a href="#" className="text-sm text-gray-300 hover:underline">
           Images
         </a>
-        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
-          U
+        
+        {/* Apps Grid Button */}
+        <button 
+          onClick={toggleAppsGrid}
+          className="p-2 hover:bg-gray-700 rounded-full transition-colors relative"
+          aria-label="Google apps"
+        >
+          <div className="grid grid-cols-3 gap-0.5 w-5 h-5">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="w-1 h-1 bg-gray-300 rounded-sm"></div>
+            ))}
+          </div>
+        </button>
+
+        {/* Profile Picture */}
+        <div className="w-8 h-8 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-blue-500 rounded-full flex items-center justify-center text-sm font-medium cursor-pointer hover:shadow-lg transition-shadow">
+          <img 
+            src="/placeholder.svg?height=32&width=32&query=professional+profile+photo" 
+            alt="Profile" 
+            className="w-full h-full rounded-full object-cover"
+          />
         </div>
+
+        {/* Apps Grid Dropdown */}
+        {showAppsGrid && (
+          <div className="absolute top-14 right-4 bg-white rounded-lg shadow-2xl border p-4 z-50 w-80">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-gray-600 text-sm font-medium">Company Apps</span>
+              <button 
+                onClick={toggleAppsGrid}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {organizationApps.map((app, index) => (
+                <a
+                  key={index}
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-lg transition-colors group"
+                >
+                  <div className={`w-12 h-12 ${app.color} rounded-full flex items-center justify-center mb-2 text-white text-xl group-hover:scale-110 transition-transform`}>
+                    {app.icon}
+                  </div>
+                  <span className="text-xs text-gray-700 text-center font-medium">
+                    {app.name}
+                  </span>
+                </a>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <a 
+                href="#" 
+                className="text-blue-600 text-sm hover:underline"
+              >
+                More apps →
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Click outside to close */}
+        {showAppsGrid && (
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setShowAppsGrid(false)}
+          ></div>
+        )}
       </header>
 
       {/* Main Content */}

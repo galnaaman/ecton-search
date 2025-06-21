@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { Search, ArrowLeft, ExternalLink } from "lucide-react"
+import { Search, ArrowLeft, ExternalLink, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -16,10 +16,23 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [showAppsGrid, setShowAppsGrid] = useState(false)
   const [searchStats, setSearchStats] = useState<{
     totalHits: number
     processingTime: number
   }>({ totalHits: 0, processingTime: 0 })
+
+  const organizationApps = [
+    { name: "Portal", icon: "🏢", url: "https://portal.internal.company.com", color: "bg-blue-500" },
+    { name: "Finance", icon: "💰", url: "https://finance.internal.company.com", color: "bg-green-500" },
+    { name: "CRM", icon: "👥", url: "https://crm.internal.company.com", color: "bg-purple-500" },
+    { name: "Documents", icon: "📄", url: "https://docs.internal.company.com", color: "bg-orange-500" },
+    { name: "Help Desk", icon: "🎧", url: "https://helpdesk.internal.company.com", color: "bg-red-500" },
+    { name: "Calendar", icon: "📅", url: "https://calendar.internal.company.com", color: "bg-blue-600" },
+    { name: "Mail", icon: "✉️", url: "https://mail.internal.company.com", color: "bg-gray-600" },
+    { name: "Wiki", icon: "📖", url: "https://wiki.internal.company.com", color: "bg-yellow-500" },
+    { name: "Monitoring", icon: "📊", url: "https://monitoring.internal.company.com", color: "bg-indigo-500" }
+  ]
 
   const initialQuery = searchParams.get('q') || ""
 
@@ -75,6 +88,10 @@ export default function SearchPage() {
     }
   }
 
+  const toggleAppsGrid = () => {
+    setShowAppsGrid(!showAppsGrid)
+  }
+
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'website': return 'bg-blue-100 text-blue-800'
@@ -88,35 +105,118 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 relative">
         <div className="px-6 py-3">
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-3">
-              <span className="text-2xl font-normal text-[#4285f4]">Internal Search</span>
-            </Link>
-            
-            <div className="flex-1 max-w-2xl">
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                  <Search className="w-5 h-5 text-gray-400" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <Link href="/" className="flex items-center space-x-3">
+                <span className="text-2xl font-normal text-[#4285f4]">Internal Search</span>
+              </Link>
+              
+              <div className="flex-1 max-w-2xl">
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="w-full h-11 pl-12 pr-12 text-base border border-gray-300 rounded-full focus:border-blue-500 focus:shadow-sm hover:shadow-sm"
+                    placeholder="Search your network..."
+                  />
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
+                    <button className="p-2 hover:bg-gray-100 rounded">
+                      <Search className="w-4 h-4 text-blue-500" />
+                    </button>
+                  </div>
                 </div>
-                <Input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="w-full h-11 pl-12 pr-12 text-base border border-gray-300 rounded-full focus:border-blue-500 focus:shadow-sm hover:shadow-sm"
-                  placeholder="Search your network..."
+              </div>
+            </div>
+
+            {/* Right Navigation */}
+            <div className="flex items-center space-x-4">
+              <a href="#" className="text-sm text-gray-600 hover:underline">
+                Gmail
+              </a>
+              <a href="#" className="text-sm text-gray-600 hover:underline">
+                Images
+              </a>
+              
+              {/* Apps Grid Button */}
+              <button 
+                onClick={toggleAppsGrid}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
+                aria-label="Company apps"
+              >
+                <div className="grid grid-cols-3 gap-0.5 w-5 h-5">
+                  {[...Array(9)].map((_, i) => (
+                    <div key={i} className="w-1 h-1 bg-gray-600 rounded-sm"></div>
+                  ))}
+                </div>
+              </button>
+
+              {/* Profile Picture */}
+              <div className="w-8 h-8 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-blue-500 rounded-full flex items-center justify-center text-sm font-medium cursor-pointer hover:shadow-lg transition-shadow">
+                <img 
+                  src="/placeholder.svg?height=32&width=32&query=professional+profile+photo" 
+                  alt="Profile" 
+                  className="w-full h-full rounded-full object-cover"
                 />
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
-                  <button className="p-2 hover:bg-gray-100 rounded">
-                    <Search className="w-4 h-4 text-blue-500" />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Apps Grid Dropdown */}
+        {showAppsGrid && (
+          <div className="absolute top-14 right-6 bg-white rounded-lg shadow-2xl border p-4 z-50 w-80">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-gray-600 text-sm font-medium">Company Apps</span>
+              <button 
+                onClick={toggleAppsGrid}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {organizationApps.map((app, index) => (
+                <a
+                  key={index}
+                  href={app.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-lg transition-colors group"
+                >
+                  <div className={`w-12 h-12 ${app.color} rounded-full flex items-center justify-center mb-2 text-white text-xl group-hover:scale-110 transition-transform`}>
+                    {app.icon}
+                  </div>
+                  <span className="text-xs text-gray-700 text-center font-medium">
+                    {app.name}
+                  </span>
+                </a>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <a 
+                href="#" 
+                className="text-blue-600 text-sm hover:underline"
+              >
+                More apps →
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Click outside to close */}
+        {showAppsGrid && (
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setShowAppsGrid(false)}
+          ></div>
+        )}
 
         {/* Navigation tabs */}
         <div className="px-6 border-b border-gray-200">
