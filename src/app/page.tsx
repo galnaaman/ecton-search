@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DockBar } from "@/components/ui/dock-bar"
 import { SearchInput, SearchInputRef } from "@/components/search-input"
+import { Meteors } from "@/components/magicui/meteors"
 
 export default function HomePage() {
   const [showAppsGrid, setShowAppsGrid] = useState(false)
@@ -41,9 +42,22 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#202124] text-white flex flex-col">
+    <div className="min-h-screen bg-[#202124] text-white flex flex-col relative overflow-hidden">
+      {/* Meteors Background Effect */}
+      <div className="absolute inset-0 z-0">
+        <Meteors 
+          number={30} 
+          minDelay={0} 
+          maxDelay={2} 
+          minDuration={3} 
+          maxDuration={8} 
+          angle={220}
+          className="bg-slate-400/30"
+        />
+      </div>
+
       {/* Header */}
-      <header className="flex justify-end items-center p-4 space-x-4 relative">
+      <header className="flex justify-end items-center p-4 space-x-4 relative z-10">
         <a href="#" className="text-sm text-gray-300 hover:underline">
           Gmail
         </a>
@@ -124,19 +138,25 @@ export default function HomePage() {
       </header>
 
       {/* Dock Bar - Floating */}
-      <DockBar 
-        type="success"
-        title="New"
-        message="update v1.2.0 is live"
-        onClose={() => console.log("Dock bar closed")}
-      />
+      <div className="relative z-10">
+        <DockBar 
+          type="success"
+          title="New"
+          message="update v1.2.0 is live"
+          onClose={() => console.log("Dock bar closed")}
+        />
+      </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 relative z-10">
         {/* Logo */}
         <div className="mb-8">
-          <h1 className="text-6xl font-normal text-white tracking-wide">
-            Internal Search
+          <h1 className="text-8xl font-normal text-white tracking-tight" style={{ 
+            fontFamily: 'Product Sans, Google Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontWeight: 400,
+            letterSpacing: '-0.02em'
+          }}>
+            Ecton
           </h1>
         </div>
 
@@ -181,7 +201,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#171717] px-8 py-4">
+      <footer className="bg-[#171717] px-8 py-4 relative z-10">
         <div className="flex flex-col space-y-4">
           <div className="text-gray-400 text-sm">
             Internal Network Search
