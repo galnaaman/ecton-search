@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Search, Camera, Mic, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DockBar } from "@/components/ui/dock-bar"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -129,6 +130,14 @@ export default function HomePage() {
           ></div>
         )}
       </header>
+
+      {/* Dock Bar - Floating */}
+      <DockBar 
+        type="success"
+        title="New"
+        message="update v1.2.0 is live"
+        onClose={() => console.log("Dock bar closed")}
+      />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-4">
