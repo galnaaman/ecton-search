@@ -155,14 +155,13 @@ export default function SearchPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center space-x-3">
-                <span className="text-2xl font-normal text-[#4285f4]">Internal Search</span>
+                <span className="text-2xl font-normal text-[#4285f4]">ECTON Search</span>
               </Link>
               
               <div className="flex-1 max-w-2xl">
                 <SearchInput 
                   variant="header"
                   initialQuery={initialQuery}
-                  placeholder="Search your network..."
                 />
               </div>
             </div>

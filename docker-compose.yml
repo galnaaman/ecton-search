@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Meilisearch service
+  meilisearch:
+    image: getmeili/meilisearch:v1.5
+    container_name: ecton-meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=your-secret-master-key-here
+      - MEILI_ENV=production
+    volumes:
+      - meilisearch_data:/meili_data
+    restart: unless-stopped
+    networks:
+      - ecton-network
+
+  # Next.js application
+  ecton-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecton-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_MEILISEARCH_URL=http://meilisearch:7700
+      - NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY=your-secret-master-key-here
+    depends_on:
+      - meilisearch
+    restart: unless-stopped
+    networks:
+      - ecton-network
+
+volumes:
+  meilisearch_data:
+
+networks:
+  ecton-network:
+    driver: bridge 

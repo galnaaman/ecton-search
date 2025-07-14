@@ -5,8 +5,8 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Meiliseatch Table Demo',
-  description: 'A Next.js app showcasing Meilisearch with a table from shadcn/ui',
+  title: 'Ecton Search',
+  description: 'Ecton Search is a search engine for the Ecton network.',
 }
 
 export default function RootLayout({
@@ -16,6 +16,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="search"
+          type="application/opensearchdescription+xml"
+          title="Ecton Search"
+          href="/opensearch.xml"
+        />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )

@@ -2,10 +2,25 @@
 
 import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { DockBar } from "@/components/ui/dock-bar"
 import { SearchInput, SearchInputRef } from "@/components/search-input"
-import { Meteors } from "@/components/magicui/meteors"
+import { SparklesCore } from "@/components/ui/sparkles"
+import { Spotlight } from "@/components/ui/spotlight"
+import { FloatingDock } from "@/components/ui/floating-dock"
+import { 
+  Home, 
+  Search, 
+  FileText, 
+  Users, 
+  Settings, 
+  HelpCircle, 
+  Calendar,
+  Mail,
+  Database,
+  Shield
+} from "lucide-react"
 
 export default function HomePage() {
   const [showAppsGrid, setShowAppsGrid] = useState(false)
@@ -29,6 +44,60 @@ export default function HomePage() {
     setShowAppsGrid(!showAppsGrid)
   }
 
+  // Floating Dock Quick Access Links
+  const dockItems = [
+    {
+      title: "Home",
+      icon: <Home className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "/",
+    },
+    {
+      title: "Search",
+      icon: <Search className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "/search",
+    },
+    {
+      title: "Documents",
+      icon: <FileText className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://docs.internal.company.com",
+    },
+    {
+      title: "Team Directory",
+      icon: <Users className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://portal.internal.company.com/directory",
+    },
+    {
+      title: "Calendar",
+      icon: <Calendar className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://calendar.internal.company.com",
+    },
+    {
+      title: "Mail",
+      icon: <Mail className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://mail.internal.company.com",
+    },
+    {
+      title: "Database",
+      icon: <Database className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://db.internal.company.com",
+    },
+    {
+      title: "Help Desk",
+      icon: <HelpCircle className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://helpdesk.internal.company.com",
+    },
+    {
+      title: "Security",
+      icon: <Shield className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "https://security.internal.company.com",
+    },
+    {
+      title: "Settings",
+      icon: <Settings className="h-full w-full text-neutral-500 dark:text-neutral-300" />,
+      href: "/settings",
+    },
+  ]
+
   const organizationApps = [
     { name: "Portal", icon: "🏢", url: "https://portal.internal.company.com", color: "bg-blue-500" },
     { name: "Finance", icon: "💰", url: "https://finance.internal.company.com", color: "bg-green-500" },
@@ -43,28 +112,17 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#202124] text-white flex flex-col relative overflow-hidden">
-      {/* Meteors Background Effect */}
-      <div className="absolute inset-0 z-0">
-        <Meteors 
-          number={30} 
-          minDelay={0} 
-          maxDelay={2} 
-          minDuration={3} 
-          maxDuration={8} 
-          angle={220}
-          className="bg-slate-400/30"
-        />
-      </div>
-
+      {/* Spotlight Effect */}
+      <Spotlight
+        className="-top-40 left-0 md:left-60 md:-top-20"
+        fill="white"
+      />
+      
       {/* Header */}
-      <header className="flex justify-end items-center p-4 space-x-4 relative z-10">
+      <header className="flex justify-end items-center p-4 space-x-4 relative z-20">
         <a href="#" className="text-sm text-gray-300 hover:underline">
           Gmail
-        </a>
-        <a href="#" className="text-sm text-gray-300 hover:underline">
-          Images
-        </a>
-        
+        </a> 
         {/* Apps Grid Button */}
         <button 
           onClick={toggleAppsGrid}
@@ -80,9 +138,11 @@ export default function HomePage() {
 
         {/* Profile Picture */}
         <div className="w-8 h-8 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 to-blue-500 rounded-full flex items-center justify-center text-sm font-medium cursor-pointer hover:shadow-lg transition-shadow">
-          <img 
-            src="/placeholder.svg?height=32&width=32&query=professional+profile+photo" 
+          <Image 
+            src="/profile-photo.jpg" 
             alt="Profile" 
+            width={32}
+            height={32}
             className="w-full h-full rounded-full object-cover"
           />
         </div>
@@ -138,20 +198,33 @@ export default function HomePage() {
       </header>
 
       {/* Dock Bar - Floating */}
-      <div className="relative z-10">
-        <DockBar 
-          type="success"
-          title="New"
-          message="update v1.2.0 is live"
-          onClose={() => console.log("Dock bar closed")}
-        />
-      </div>
+      <DockBar 
+        type="success"
+        title="New"
+        message="update v1.2.0 is live"
+        onClose={() => console.log("Dock bar closed")}
+      />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 relative z-10">
-        {/* Logo */}
-        <div className="mb-8">
-          <h1 className="text-8xl font-normal text-white tracking-tight" style={{ 
+        {/* Logo with Sparkles */}
+        <div className="mb-8 relative">
+          {/* Sparkles Background */}
+          <div className="absolute inset-0 w-full h-full">
+            <SparklesCore
+              id="tsparticlesfullpage"
+              background="transparent"
+              minSize={0.6}
+              maxSize={1.4}
+              particleDensity={100}
+              className="w-full h-full"
+              particleColor="#FFFFFF"
+              speed={0.5}
+            />
+          </div>
+          
+          {/* Ecton Text */}
+          <h1 className="relative z-20 text-9xl md:text-[12rem] font-normal text-white tracking-tight" style={{ 
             fontFamily: 'Product Sans, Google Sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             fontWeight: 400,
             letterSpacing: '-0.02em'
@@ -166,7 +239,6 @@ export default function HomePage() {
             ref={searchInputRef}
             variant="homepage"
             showIcons={true}
-            placeholder="Search your network..."
           />
         </div>
 
@@ -232,6 +304,15 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Dock - Quick Access */}
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+        <FloatingDock
+          items={dockItems}
+          desktopClassName="bg-black/20 backdrop-blur-md border border-white/10"
+          mobileClassName="bg-black/20 backdrop-blur-md border border-white/10"
+        />
+      </div>
     </div>
   )
 }
