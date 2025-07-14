@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { MeiliSearch } from 'meilisearch'
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,6 +30,23 @@ export async function GET(request: NextRequest) {
     }
 
     const searchResponse = await index.search(query, searchOptions)
+
+    // Track search analytics
+    if (query && query.trim()) {
+      const userIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null
+      const userAgent = request.headers.get('user-agent') || null
+      
+      await prisma.searchAnalytics.create({
+        data: {
+          query: query.trim(),
+          resultsCount: searchResponse.estimatedTotalHits || 0,
+          userIp,
+          userAgent
+        }
+      }).catch(err => {
+        console.error('Failed to track search analytics:', err)
+      })
+    }
 
     return NextResponse.json({
       query,
@@ -87,6 +105,23 @@ export async function POST(request: NextRequest) {
     if (facets) searchOptions.facets = facets
 
     const searchResponse = await index.search(query, searchOptions)
+
+    // Track search analytics
+    if (query && query.trim()) {
+      const userIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null
+      const userAgent = request.headers.get('user-agent') || null
+      
+      await prisma.searchAnalytics.create({
+        data: {
+          query: query.trim(),
+          resultsCount: searchResponse.estimatedTotalHits || 0,
+          userIp,
+          userAgent
+        }
+      }).catch(err => {
+        console.error('Failed to track search analytics:', err)
+      })
+    }
 
     return NextResponse.json({
       query,

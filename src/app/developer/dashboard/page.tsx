@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { SitesTable } from '@/components/developer/sites-table'
 import { SiteForm } from '@/components/developer/site-form'
 import { Button } from '@/components/ui/button'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User, BarChart } from 'lucide-react'
 
 interface Site {
   id: string
@@ -215,6 +215,14 @@ export default function DeveloperDashboard() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => router.push('/developer/dashboard/analytics')}
+                variant="outline"
+                size="sm"
+              >
+                <BarChart className="h-4 w-4 mr-2" />
+                Analytics
+              </Button>
               <div className="flex items-center space-x-2 text-sm text-gray-700">
                 <User className="h-4 w-4" />
                 <span>{user?.username}</span>

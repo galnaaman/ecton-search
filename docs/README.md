@@ -6,6 +6,7 @@ Welcome to the Ecton Search documentation! This guide covers everything you need
 
 - **[OpenSearch Integration Guide](./opensearch-integration.md)** - Complete setup and usage guide
 - **[API Reference](./api-reference.md)** - Technical API documentation
+- **[Developer Portal Guide](./developer-portal.md)** - Admin interface for content management
 - **[Deployment Guide](./deployment.md)** - Production deployment instructions
 - **[Troubleshooting](./troubleshooting.md)** - Common issues and solutions
 - **[Architecture Overview](./architecture.md)** - System design and components
@@ -13,8 +14,9 @@ Welcome to the Ecton Search documentation! This guide covers everything you need
 ## 🚀 Quick Start
 
 1. **For End Users**: See [OpenSearch Integration Guide](./opensearch-integration.md#for-end-users)
-2. **For Administrators**: See [Deployment Guide](./deployment.md)
-3. **For Developers**: See [API Reference](./api-reference.md)
+2. **For Administrators**: See [Developer Portal Guide](./developer-portal.md) for content management
+3. **For IT/DevOps**: See [Deployment Guide](./deployment.md)
+4. **For Developers**: See [API Reference](./api-reference.md)
 
 ## 🎯 What is OpenSearch Integration?
 
@@ -59,9 +61,12 @@ scripts/
 
 - **Chrome Integration**: Native browser search engine support
 - **Real-time Suggestions**: Autocomplete powered by Meilisearch
+- **Developer Portal**: Secure admin interface for content management
+- **Search Analytics**: Track and analyze search patterns
 - **Internal Network Focus**: Searches only company resources
 - **Production Ready**: Proper error handling and fallbacks
 - **Docker Support**: Easy deployment with containers
+- **PostgreSQL Database**: Persistent storage for sites and analytics
 
 ## 🎓 Getting Help
 

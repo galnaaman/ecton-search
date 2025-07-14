@@ -326,6 +326,226 @@ interface SearchResponse {
 }
 ```
 
+## 🔐 Developer Portal API Endpoints
+
+### Authentication Endpoints
+
+#### POST /api/auth/login
+
+Authenticates a user and returns a JWT token.
+
+**Request Body**:
+```json
+{
+  "username": "admin",
+  "password": "admin123"
+}
+```
+
+**Response**:
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "clxx123...",
+    "username": "admin",
+    "role": "admin"
+  }
+}
+```
+
+**Status Codes**:
+- `200`: Successful login
+- `401`: Invalid credentials
+- `400`: Missing username or password
+
+#### POST /api/auth/logout
+
+Logs out the current user (client-side token removal).
+
+**Response**:
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+#### POST /api/auth/init
+
+Initializes the database and creates default admin user.
+
+**Response**:
+```json
+{
+  "message": "Database initialized successfully",
+  "hasDefaultAdmin": true,
+  "siteCount": 0
+}
+```
+
+### Site Management Endpoints
+
+All site management endpoints require authentication via Bearer token:
+
+**Headers**:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+#### GET /api/developer/sites
+
+Lists all sites with pagination and search.
+
+**Query Parameters**:
+- `page` (number): Page number (default: 1)
+- `limit` (number): Items per page (default: 10)
+- `search` (string): Search query
+
+**Response**:
+```json
+{
+  "sites": [
+    {
+      "id": "clxx123...",
+      "name": "Company Portal",
+      "url": "https://portal.company.com",
+      "description": "Main company portal",
+      "type": "website",
+      "createdAt": "2025-01-14T12:00:00Z",
+      "updatedAt": "2025-01-14T12:00:00Z",
+      "createdByUser": {
+        "username": "admin"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "pages": 5
+  }
+}
+```
+
+#### POST /api/developer/sites
+
+Creates a new site.
+
+**Request Body**:
+```json
+{
+  "name": "HR Portal",
+  "url": "https://hr.company.com",
+  "description": "Human Resources portal",
+  "type": "website"
+}
+```
+
+**Response**:
+```json
+{
+  "message": "Site created successfully",
+  "site": {
+    "id": "clxx456...",
+    "name": "HR Portal",
+    // ... full site object
+  }
+}
+```
+
+#### PUT /api/developer/sites/[id]
+
+Updates an existing site.
+
+**Request Body**: Same as POST
+
+**Response**: Same as POST
+
+#### DELETE /api/developer/sites/[id]
+
+Deletes a site.
+
+**Response**:
+```json
+{
+  "message": "Site deleted successfully"
+}
+```
+
+#### POST /api/developer/sync
+
+Synchronizes all sites from PostgreSQL to Meilisearch.
+
+**Response**:
+```json
+{
+  "message": "Meilisearch synchronized successfully",
+  "syncedCount": 42
+}
+```
+
+### Analytics Endpoints
+
+#### GET /api/developer/analytics
+
+Retrieves search analytics data.
+
+**Query Parameters**:
+- `days` (number): Number of days to look back (default: 7)
+- `limit` (number): Limit for top queries (default: 10)
+
+**Response**:
+```json
+{
+  "overview": {
+    "totalSearches": 1234,
+    "uniqueQueries": 456,
+    "avgResultsPerQuery": 12.5,
+    "dateRange": {
+      "start": "2025-01-07T00:00:00Z",
+      "end": "2025-01-14T00:00:00Z",
+      "days": 7
+    }
+  },
+  "searchVolume": [
+    {
+      "date": "2025-01-14",
+      "count": 234
+    }
+  ],
+  "topQueries": [
+    {
+      "query": "employee handbook",
+      "count": 45,
+      "avg_results": 8.5
+    }
+  ],
+  "noResultQueries": [
+    {
+      "query": "vacation policy 2025",
+      "count": 12
+    }
+  ]
+}
+```
+
+#### POST /api/developer/analytics
+
+Exports analytics data.
+
+**Request Body**:
+```json
+{
+  "format": "csv", // or "json"
+  "days": 30
+}
+```
+
+**Response**:
+- For CSV: Returns CSV file with appropriate headers
+- For JSON: Returns full analytics data in JSON format
+
 ## 🔒 Authentication & Security
 
 ### Environment Variables
@@ -333,16 +553,26 @@ interface SearchResponse {
 Required environment variables:
 
 ```bash
+# Meilisearch
 NEXT_PUBLIC_MEILISEARCH_URL=http://localhost:7700
 NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY=optional_search_key
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/ecton
+
+# Authentication
+JWT_SECRET=your-secret-key
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
 ```
 
 ### Security Considerations
 
-- **Internal Network Only**: All APIs are designed for internal network use
-- **No Authentication Required**: Assumes internal network security
-- **Rate Limiting**: Consider implementing rate limiting for production
-- **Input Validation**: All inputs are validated and sanitized
+- **JWT Authentication**: Developer portal requires JWT tokens
+- **Password Hashing**: Passwords hashed with bcrypt (12 rounds)
+- **Internal Network Only**: All APIs designed for internal use
+- **Input Validation**: All inputs validated and sanitized
+- **Audit Logging**: All changes tracked in audit log
 
 ## 🚨 Error Handling
 

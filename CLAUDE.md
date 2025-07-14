@@ -37,14 +37,21 @@ curl -X POST http://localhost:3000/api/meilisearch/init
 - **Language**: TypeScript (strict mode)
 - **Styling**: Tailwind CSS + Radix UI + Framer Motion
 - **Search Engine**: Meilisearch v0.33.0
+- **Database**: PostgreSQL 15 with Prisma ORM
+- **Authentication**: JWT with bcrypt password hashing
 - **Deployment**: Docker with standalone output
 
 ### Key Directories
 - `src/app/` - Next.js App Router pages and API routes
 - `src/app/api/meilisearch/` - RESTful API for all Meilisearch operations
+- `src/app/api/auth/` - Authentication endpoints (login, logout, init)
+- `src/app/api/developer/` - Developer portal APIs (sites, analytics, sync)
+- `src/app/developer/` - Developer portal UI pages
 - `src/components/` - Reusable React components
 - `src/components/ui/` - UI component library (buttons, tables, animations)
+- `src/components/developer/` - Developer portal specific components
 - `src/lib/` - Utilities and service singletons
+- `prisma/` - Database schema and migrations
 
 ### Core Components Architecture
 
@@ -54,24 +61,45 @@ curl -X POST http://localhost:3000/api/meilisearch/init
    - `SearchPage` (src/app/search/page.tsx) → Displays results in DataTable
    - `meilisearch.ts` → Singleton client for Meilisearch connection
 
-2. **API Architecture** (src/app/api/meilisearch/):
-   - All endpoints follow RESTful patterns
-   - Centralized error handling with proper HTTP status codes
-   - Support for both GET and POST methods where appropriate
-   - CORS enabled for cross-origin requests
+2. **Developer Portal Flow**:
+   - `DeveloperPortal` (src/app/developer/page.tsx) → Login interface
+   - `DeveloperDashboard` (src/app/developer/dashboard/page.tsx) → Site management
+   - `AnalyticsDashboard` (src/app/developer/dashboard/analytics/page.tsx) → Search analytics
+   - Authentication via JWT tokens with 24-hour expiry
 
-3. **UI Component System**:
+3. **API Architecture**:
+   - Meilisearch APIs: Search and index management
+   - Authentication APIs: Login, logout, initialization
+   - Developer APIs: Site CRUD, analytics, synchronization
+   - All endpoints follow RESTful patterns with proper error handling
+
+4. **Database Architecture**:
+   - PostgreSQL with Prisma ORM
+   - Models: Users, Sites, SearchAnalytics, AuditLog
+   - Automatic migrations and type-safe queries
+   - Audit logging for all site changes
+
+5. **UI Component System**:
    - All UI components use `cn()` utility for className merging
    - Components follow compound pattern (e.g., Table.Root, Table.Header)
    - Animation components use Framer Motion
-   - Consistent use of CSS variables for theming
+   - Developer portal components for forms, tables, and charts
 
 ### Environment Configuration
 
 Required environment variables:
 ```bash
+# Meilisearch Configuration
 NEXT_PUBLIC_MEILISEARCH_URL=http://localhost:7700
 NEXT_PUBLIC_MEILISEARCH_SEARCH_KEY=your_api_key_here
+
+# Database Configuration
+DATABASE_URL=postgresql://ecton_user:ecton_password@localhost:5432/ecton
+
+# Authentication Configuration
+JWT_SECRET=your-jwt-secret-key-here
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin123
 ```
 
 ### Docker Architecture

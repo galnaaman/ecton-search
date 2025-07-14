@@ -76,6 +76,25 @@ This document provides a comprehensive technical overview of the Ecton Search Op
                                 │ File System
                                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
+│                      Database Layer                            │
+├─────────────────────────────────────────────────────────────────┤
+│                        PostgreSQL                              │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │                   Data Models                           │   │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐   │   │
+│  │  │ Users       │ │ Sites       │ │ Search Analytics│   │   │
+│  │  │ (Auth)      │ │ (Content)   │ │ (Tracking)      │   │   │
+│  │  └─────────────┘ └─────────────┘ └─────────────────┘   │   │
+│  │  ┌─────────────┐ ┌─────────────┐                       │   │
+│  │  │ Audit Log   │ │ Sessions    │                       │   │
+│  │  │ (History)   │ │ (Future)    │                       │   │
+│  │  └─────────────┘ └─────────────┘                       │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                │ File System
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
 │                       Storage Layer                            │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐   │
@@ -171,11 +190,21 @@ src/app/api/
 │   ├── search/route.ts          # Browser search handler
 │   └── suggestions/route.ts     # Autocomplete suggestions
 ├── meilisearch/
-│   ├── search/route.ts          # Direct search API
+│   ├── search/route.ts          # Direct search API (with analytics)
 │   ├── init/route.ts            # Index initialization
 │   ├── documents/route.ts       # Document management
 │   ├── index/route.ts           # Index management
 │   └── indexes/route.ts         # List all indexes
+├── auth/
+│   ├── login/route.ts           # JWT authentication
+│   ├── logout/route.ts          # Session termination
+│   └── init/route.ts            # Database initialization
+├── developer/
+│   ├── sites/
+│   │   ├── route.ts             # Site CRUD operations
+│   │   └── [id]/route.ts        # Individual site operations
+│   ├── analytics/route.ts       # Search analytics & export
+│   └── sync/route.ts            # Meilisearch synchronization
 └── opensearch.xml/route.ts      # OpenSearch descriptor
 ```
 
@@ -333,6 +362,56 @@ type DocumentType = 'website' | 'document' | 'system' | 'database'
 ```
 User Types → Debounce (150ms) → API Call → Meilisearch Query → 
 Results Transform → Dropdown Display → Selection → Search Redirect
+```
+
+### Developer Portal Architecture
+
+#### Authentication Flow
+
+```
+Login Request → /api/auth/login
+      ↓
+Validate Credentials (bcrypt)
+      ↓
+Generate JWT Token (24h expiry)
+      ↓
+Store in LocalStorage
+      ↓
+Include in API Headers (Bearer token)
+      ↓
+Validate on Each Request
+```
+
+#### Data Synchronization
+
+```
+PostgreSQL (Source of Truth)
+      ↓
+Site Management Operations (CRUD)
+      ↓
+Audit Log Creation
+      ↓
+Manual/Auto Sync Trigger
+      ↓
+Meilisearch Index Update
+      ↓
+Search Results Updated
+```
+
+#### Analytics Pipeline
+
+```
+User Search → Meilisearch Query
+      ↓
+Search Results Generated
+      ↓
+Analytics Data Captured (Async)
+      ↓
+Store in PostgreSQL
+      ↓
+Aggregate for Dashboard
+      ↓
+Export (CSV/JSON)
 ```
 
 ## 🔒 Security Architecture
