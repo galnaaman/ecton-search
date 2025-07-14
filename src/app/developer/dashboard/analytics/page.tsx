@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Sidebar } from '@/components/developer/sidebar'
 import { AnalyticsChart } from '@/components/developer/analytics-chart'
 import { ArrowLeft, Download, RefreshCw, TrendingUp, Search, AlertCircle } from 'lucide-react'
 
@@ -27,16 +28,27 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true)
   const [days, setDays] = useState(7)
   const [exporting, setExporting] = useState(false)
+  const [user, setUser] = useState<any>(null)
   const router = useRouter()
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
-    if (!token) {
+    const userData = localStorage.getItem('user')
+    
+    if (!token || !userData) {
       router.push('/developer')
       return
     }
+
+    setUser(JSON.parse(userData))
     fetchAnalytics()
   }, [router, days])
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user')
+    router.push('/developer')
+  }
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('auth_token')
@@ -145,49 +157,46 @@ export default function AnalyticsDashboard() {
   const chartData = prepareChartData()
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Button
-                onClick={() => router.push('/developer/dashboard')}
-                variant="outline"
-                size="sm"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <h1 className="text-xl font-semibold text-gray-900">
-                Search Analytics
-              </h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <select
-                value={days}
-                onChange={(e) => setDays(parseInt(e.target.value))}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-              >
-                <option value="7">Last 7 days</option>
-                <option value="14">Last 14 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="90">Last 90 days</option>
-              </select>
-              <Button
-                onClick={() => fetchAnalytics()}
-                variant="outline"
-                size="sm"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      {user && <Sidebar user={user} onLogout={handleLogout} />}
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Search Analytics
+                </h1>
+              </div>
+              <div className="flex items-center space-x-2">
+                <select
+                  value={days}
+                  onChange={(e) => setDays(parseInt(e.target.value))}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="7">Last 7 days</option>
+                  <option value="14">Last 14 days</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90">Last 90 days</option>
+                </select>
+                <Button
+                  onClick={() => fetchAnalytics()}
+                  variant="outline"
+                  size="sm"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         {analytics && (
           <>
             {/* Overview Cards */}
@@ -302,7 +311,8 @@ export default function AnalyticsDashboard() {
             </div>
           </>
         )}
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

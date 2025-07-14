@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { SitesTable } from '@/components/developer/sites-table'
 import { SiteForm } from '@/components/developer/site-form'
+import { Sidebar } from '@/components/developer/sidebar'
 import { Button } from '@/components/ui/button'
 import { LogOut, User, BarChart } from 'lucide-react'
 
@@ -131,7 +132,7 @@ export default function DeveloperDashboard() {
     }
   }
 
-  const handleSaveSite = async (siteData: Omit<Site, 'id'>) => {
+  const handleSaveSite = async (siteData: Omit<Site, 'id' | 'createdAt' | 'updatedAt' | 'createdByUser'>) => {
     try {
       const url = editingSite 
         ? `/api/developer/sites/${editingSite.id}`
@@ -203,78 +204,72 @@ export default function DeveloperDashboard() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                Developer Dashboard
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                onClick={() => router.push('/developer/dashboard/analytics')}
-                variant="outline"
-                size="sm"
-              >
-                <BarChart className="h-4 w-4 mr-2" />
-                Analytics
-              </Button>
-              <div className="flex items-center space-x-2 text-sm text-gray-700">
-                <User className="h-4 w-4" />
-                <span>{user?.username}</span>
-                <span className="text-gray-500">({user?.role})</span>
-              </div>
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                size="sm"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            </div>
-          </div>
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
-      </header>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar user={user} onLogout={handleLogout} />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {showForm ? (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {editingSite ? 'Edit Site' : 'Add New Site'}
-            </h3>
-            <SiteForm
-              site={editingSite}
-              onSave={handleSaveSite}
-              onCancel={() => {
-                setShowForm(false)
-                setEditingSite(null)
-              }}
-              loading={loading}
-            />
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center">
+                <h1 className="text-xl font-semibold text-gray-900">
+                  Site Management
+                </h1>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow p-6">
-            <SitesTable
-              sites={sites}
-              pagination={pagination}
-              onEdit={handleEditSite}
-              onDelete={handleDeleteSite}
-              onPageChange={handlePageChange}
-              onSearch={handleSearch}
-              onRefresh={handleRefresh}
-              onSync={handleSync}
-              onAdd={handleAddSite}
-              loading={loading}
-            />
-          </div>
-        )}
-      </main>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+          {showForm ? (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {editingSite ? 'Edit Site' : 'Add New Site'}
+              </h3>
+              <SiteForm
+                site={editingSite || undefined}
+                onSave={handleSaveSite}
+                onCancel={() => {
+                  setShowForm(false)
+                  setEditingSite(null)
+                }}
+                loading={loading}
+              />
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow p-6">
+              <SitesTable
+                sites={sites}
+                pagination={pagination}
+                onEdit={handleEditSite}
+                onDelete={handleDeleteSite}
+                onPageChange={handlePageChange}
+                onSearch={handleSearch}
+                onRefresh={handleRefresh}
+                onSync={handleSync}
+                onAdd={handleAddSite}
+                loading={loading}
+              />
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

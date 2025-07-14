@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { authenticateRequest, canManageSites } from '@/lib/auth'
+import { authenticateRequest, canManageCMS } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
     const user = await authenticateRequest(request)
     
-    if (!user || !canManageSites(user.role)) {
+    if (!user || !canManageCMS(user.role)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -16,33 +16,23 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
-    const search = searchParams.get('search') || ''
 
-    const where = search ? {
-      OR: [
-        { name: { contains: search, mode: 'insensitive' as const } },
-        { url: { contains: search, mode: 'insensitive' as const } },
-        { description: { contains: search, mode: 'insensitive' as const } }
-      ]
-    } : {}
-
-    const [sites, total] = await Promise.all([
-      prisma.site.findMany({
-        where,
+    const [apps, total] = await Promise.all([
+      prisma.app.findMany({
         include: {
           createdByUser: {
             select: { username: true }
           }
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { order: 'asc' },
         skip: (page - 1) * limit,
         take: limit
       }),
-      prisma.site.count({ where })
+      prisma.app.count()
     ])
 
     return NextResponse.json({
-      sites,
+      apps,
       pagination: {
         page,
         limit,
@@ -52,7 +42,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Error fetching sites:', error)
+    console.error('Error fetching apps:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -64,18 +54,18 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authenticateRequest(request)
     
-    if (!user || !canManageSites(user.role)) {
+    if (!user || !canManageCMS(user.role)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const { name, url, description, type } = await request.json()
+    const { name, icon, url, color, description, order, isActive } = await request.json()
 
-    if (!name || !url) {
+    if (!name || !icon || !url || !color) {
       return NextResponse.json(
-        { error: 'Name and URL are required' },
+        { error: 'Name, icon, URL, and color are required' },
         { status: 400 }
       )
     }
@@ -90,12 +80,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const site = await prisma.site.create({
+    const app = await prisma.app.create({
       data: {
         name,
+        icon,
         url,
+        color,
         description: description || null,
-        type: type || 'website',
+        order: order || 0,
+        isActive: isActive !== undefined ? isActive : true,
         createdBy: user.id
       },
       include: {
@@ -105,23 +98,13 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Log the creation
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'create',
-        siteId: site.id,
-        changes: { name, url, description, type }
-      }
-    })
-
     return NextResponse.json({
-      message: 'Site created successfully',
-      site
+      message: 'App created successfully',
+      app
     }, { status: 201 })
 
   } catch (error: any) {
-    console.error('Error creating site:', error)
+    console.error('Error creating app:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

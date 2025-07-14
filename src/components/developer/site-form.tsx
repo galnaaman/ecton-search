@@ -10,11 +10,16 @@ interface Site {
   url: string
   description: string | null
   type: string
+  createdAt: string
+  updatedAt: string
+  createdByUser: {
+    username: string
+  }
 }
 
 interface SiteFormProps {
   site?: Site
-  onSave: (site: Omit<Site, 'id'>) => void
+  onSave: (site: Omit<Site, 'id' | 'createdAt' | 'updatedAt' | 'createdByUser'>) => void
   onCancel: () => void
   loading?: boolean
 }

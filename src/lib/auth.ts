@@ -84,3 +84,20 @@ export async function createDefaultAdmin(): Promise<void> {
     console.log(`Default admin user created: ${adminUsername}`)
   }
 }
+
+// Role-based permission checks
+export function canManageSites(role: string): boolean {
+  return role === 'technical' || role === 'admin'
+}
+
+export function canViewAnalytics(role: string): boolean {
+  return role === 'admin'
+}
+
+export function canManageCMS(role: string): boolean {
+  return role === 'admin'
+}
+
+export function canAccessDeveloperPortal(role: string): boolean {
+  return role === 'technical' || role === 'admin'
+}
