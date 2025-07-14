@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("developer") // "admin" or "developer"
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  sites        Site[]
+  auditLogs    AuditLog[]
+  
+  @@map("users")
+}
+
+model Site {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  description String?
+  type        String   @default("website") // "website", "document", "system", "database"
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  createdByUser User       @relation(fields: [createdBy], references: [id])
+  auditLogs     AuditLog[]
+  
+  @@map("sites")
+}
+
+model SearchAnalytics {
+  id               String   @id @default(cuid())
+  query            String
+  resultsCount     Int      @map("results_count")
+  clickedResultId  String?  @map("clicked_result_id")
+  userIp           String?  @map("user_ip")
+  userAgent        String?  @map("user_agent")
+  createdAt        DateTime @default(now()) @map("created_at")
+  
+  @@map("search_analytics")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  action    String   // "create", "update", "delete"
+  siteId    String   @map("site_id")
+  changes   Json?    // Store the changes made
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+  site Site @relation(fields: [siteId], references: [id])
+  
+  @@map("audit_log")
+}

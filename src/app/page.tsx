@@ -300,6 +300,9 @@ export default function HomePage() {
               <a href="#" className="text-gray-400 text-sm hover:underline">
                 Admin
               </a>
+              <a href="/developer" className="text-gray-400 text-sm hover:underline">
+                Developer Portal
+              </a>
             </div>
           </div>
         </div>
